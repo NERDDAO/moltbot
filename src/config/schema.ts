@@ -199,6 +199,10 @@ const FIELD_LABELS: Record<string, string> = {
   "tools.web.fetch.cacheTtlMinutes": "Web Fetch Cache TTL (min)",
   "tools.web.fetch.maxRedirects": "Web Fetch Max Redirects",
   "tools.web.fetch.userAgent": "Web Fetch User-Agent",
+  "tools.delve.enabled": "Enable Delve Tool",
+  "tools.delve.baseUrl": "Delve Base URL",
+  "tools.delve.token": "Delve API Token",
+  "tools.delve.timeoutMs": "Delve Timeout (ms)",
   "gateway.controlUi.basePath": "Control UI Base Path",
   "gateway.controlUi.allowInsecureAuth": "Allow Insecure Control UI Auth",
   "gateway.controlUi.dangerouslyDisableDeviceAuth": "Dangerously Disable Control UI Device Auth",
@@ -462,6 +466,11 @@ const FIELD_HELP: Record<string, string> = {
   "tools.web.fetch.firecrawl.maxAgeMs":
     "Firecrawl maxAge (ms) for cached results when supported by the API.",
   "tools.web.fetch.firecrawl.timeoutSeconds": "Timeout in seconds for Firecrawl requests.",
+  "tools.delve.enabled": "Enable the delve tool for Delve API access.",
+  "tools.delve.baseUrl":
+    "Delve base URL (fallback: DELVE_BASE_URL env var, default: http://localhost:8000).",
+  "tools.delve.token": "Delve API token (fallback: DELVE_TOKEN env var).",
+  "tools.delve.timeoutMs": "Timeout in milliseconds for Delve requests.",
   "channels.slack.allowBots":
     "Allow bot-authored messages to trigger Slack replies (default: false).",
   "channels.slack.thread.historyScope":

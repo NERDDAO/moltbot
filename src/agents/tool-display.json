@@ -167,6 +167,18 @@
         "restart": { "label": "restart", "detailKeys": ["reason", "delayMs"] }
       }
     },
+    "delve": {
+      "emoji": "🧠",
+      "title": "Delve",
+      "actions": {
+        "delve": { "label": "delve", "detailKeys": ["body.query", "body.bonfire_id"] },
+        "stack_add": { "label": "stack add", "detailKeys": ["agent_id"] },
+        "vector_search": {
+          "label": "vector search",
+          "detailKeys": ["body.search_string", "body.bonfire_ref"]
+        }
+      }
+    },
     "message": {
       "emoji": "✉️",
       "title": "Message",

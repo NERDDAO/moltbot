@@ -84,6 +84,75 @@ async function requireRiskAcknowledgement(params: {
   }
 }
 
+async function promptDelveConfig(params: {
+  config: MoltbotConfig;
+  runtime: RuntimeEnv;
+  prompter: WizardPrompter;
+}): Promise<MoltbotConfig> {
+  const existing = params.config.tools?.delve;
+  const hasToken = Boolean(existing?.token?.trim());
+  const isEnabled = existing?.enabled !== false;
+
+  await params.prompter.note(
+    [
+      "Delve lets your agent query the Delve knowledge graph and write stack messages.",
+      "It requires a Delve API token (store it in config or set DELVE_TOKEN in the Gateway environment).",
+      "Docs: https://docs.molt.bot/tools#delve",
+    ].join("\n"),
+    "Delve",
+  );
+
+  const enableDelve = await params.prompter.confirm({
+    message: "Enable Delve tool?",
+    initialValue: isEnabled,
+  });
+
+  let nextDelve = {
+    ...existing,
+    enabled: enableDelve,
+  };
+
+  if (enableDelve) {
+    const tokenInput = await params.prompter.text({
+      message: hasToken
+        ? "Delve API token (leave blank to keep current or use DELVE_TOKEN)"
+        : "Delve API token (leave blank to use DELVE_TOKEN)",
+      placeholder: hasToken ? "Leave blank to keep current" : "dlv_...",
+    });
+    const token = String(tokenInput ?? "").trim();
+    if (token) {
+      nextDelve = { ...nextDelve, token };
+    } else if (!hasToken) {
+      await params.prompter.note(
+        [
+          "No token stored yet, so Delve requests will fail until one is provided.",
+          "Store a token here or set DELVE_TOKEN in the Gateway environment.",
+          "Docs: https://docs.molt.bot/tools#delve",
+        ].join("\n"),
+        "Delve",
+      );
+    }
+
+    const baseUrlInput = await params.prompter.text({
+      message: "Delve base URL (optional)",
+      placeholder: "http://localhost:8000",
+      initialValue: existing?.baseUrl ?? "",
+    });
+    const baseUrl = String(baseUrlInput ?? "").trim();
+    if (baseUrl) {
+      nextDelve = { ...nextDelve, baseUrl };
+    }
+  }
+
+  return {
+    ...params.config,
+    tools: {
+      ...params.config.tools,
+      delve: nextDelve,
+    },
+  };
+}
+
 export async function runOnboardingWizard(
   opts: OnboardOptions,
   runtime: RuntimeEnv = defaultRuntime,
@@ -431,6 +500,8 @@ export async function runOnboardingWizard(
   } else {
     nextConfig = await setupSkills(nextConfig, workspaceDir, runtime, prompter);
   }
+
+  nextConfig = await promptDelveConfig({ config: nextConfig, runtime, prompter });
 
   // Setup hooks (session memory on /new)
   nextConfig = await setupInternalHooks(nextConfig, runtime, prompter);

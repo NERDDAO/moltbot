@@ -460,6 +460,45 @@ export async function finalizeOnboardingWizard(options: FinalizeOnboardingOption
     "Web search (optional)",
   );
 
+  const delveEnabled = nextConfig.tools?.delve?.enabled !== false;
+  const delveToken = (nextConfig.tools?.delve?.token ?? "").trim();
+  const delveTokenEnv = (process.env.DELVE_TOKEN ?? "").trim();
+  const hasDelveToken = Boolean(delveToken || delveTokenEnv);
+  const delveBaseUrl = (nextConfig.tools?.delve?.baseUrl ?? "").trim();
+  const delveBaseUrlEnv = (process.env.DELVE_BASE_URL ?? "").trim();
+
+  await prompter.note(
+    !delveEnabled
+      ? [
+          "Delve tool is disabled.",
+          "",
+          "Enable it by setting tools.delve.enabled=true.",
+          "Docs: https://docs.molt.bot/tools#delve",
+        ].join("\n")
+      : hasDelveToken
+        ? [
+            "Delve is enabled, so your agent can query the Delve knowledge graph.",
+            "",
+            delveToken
+              ? "Token: stored in config (tools.delve.token)."
+              : "Token: provided via DELVE_TOKEN env var (Gateway environment).",
+            delveBaseUrl
+              ? "Base URL: stored in config (tools.delve.baseUrl)."
+              : delveBaseUrlEnv
+                ? "Base URL: provided via DELVE_BASE_URL env var (Gateway environment)."
+                : "Base URL: using default (http://localhost:8000).",
+            "Docs: https://docs.molt.bot/tools#delve",
+          ].join("\n")
+        : [
+            "If you want your agent to use Delve, you'll need an API token.",
+            "",
+            "Set it up by adding tools.delve.token to your config or setting DELVE_TOKEN in the Gateway environment.",
+            "You can also override the base URL via tools.delve.baseUrl or DELVE_BASE_URL.",
+            "Docs: https://docs.molt.bot/tools#delve",
+          ].join("\n"),
+    "Delve (optional)",
+  );
+
   await prompter.note(
     'What now: https://molt.bot/showcase ("What People Are Building").',
     "What now",
