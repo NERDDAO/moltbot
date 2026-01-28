@@ -12,6 +12,7 @@ import { defaultRuntime } from "../runtime.js";
 import { formatDocsLink } from "../terminal/links.js";
 import { renderTable } from "../terminal/table.js";
 import { theme } from "../terminal/theme.js";
+import { ensurePluginRegistryLoaded } from "./plugin-registry.js";
 import { formatCliCommand } from "./command-format.js";
 
 /** Parse channel, allowing extension channels not in core registry. */
@@ -46,6 +47,7 @@ async function notifyApproved(channel: PairingChannel, id: string) {
 }
 
 export function registerPairingCli(program: Command) {
+  ensurePluginRegistryLoaded();
   const channels = listPairingChannels();
   const pairing = program
     .command("pairing")

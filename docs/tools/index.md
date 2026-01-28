@@ -137,6 +137,7 @@ Available groups:
 - `group:sessions`: `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`, `session_status`
 - `group:memory`: `memory_search`, `memory_get`
 - `group:web`: `web_search`, `web_fetch`
+- `group:delve`: `delve`
 - `group:ui`: `browser`, `canvas`
 - `group:automation`: `cron`, `gateway`
 - `group:messaging`: `message`
@@ -231,6 +232,18 @@ Notes:
 - For JS-heavy sites, prefer the browser tool.
 - See [Web tools](/tools/web) for setup.
 - See [Firecrawl](/tools/firecrawl) for the optional anti-bot fallback.
+
+### `delve`
+Query Delve knowledge graph, add stack messages, or run vector search.
+
+Core parameters:
+- `action` (`delve` | `stack_add` | `vector_search`)
+- `body` (JSON payload for the selected action)
+- `agent_id` (required for `stack_add`)
+
+Notes:
+- Requires a Delve API token (set `tools.delve.token` or `DELVE_TOKEN`).
+- Configure the base URL via `tools.delve.baseUrl` or `DELVE_BASE_URL`.
 
 ### `browser`
 Control the dedicated clawd browser.

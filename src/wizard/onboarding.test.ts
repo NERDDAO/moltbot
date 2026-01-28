@@ -131,14 +131,16 @@ describe("runOnboardingWizard", () => {
   it("skips prompts and setup steps when flags are set", async () => {
     const select: WizardPrompter["select"] = vi.fn(async () => "quickstart");
     const multiselect: WizardPrompter["multiselect"] = vi.fn(async () => []);
+    const note: WizardPrompter["note"] = vi.fn(async () => {});
+    const confirm: WizardPrompter["confirm"] = vi.fn(async () => false);
     const prompter: WizardPrompter = {
       intro: vi.fn(async () => {}),
       outro: vi.fn(async () => {}),
-      note: vi.fn(async () => {}),
+      note,
       select,
       multiselect,
       text: vi.fn(async () => ""),
-      confirm: vi.fn(async () => false),
+      confirm,
       progress: vi.fn(() => ({ update: vi.fn(), stop: vi.fn() })),
     };
     const runtime: RuntimeEnv = {
@@ -169,6 +171,68 @@ describe("runOnboardingWizard", () => {
     expect(setupSkills).not.toHaveBeenCalled();
     expect(healthCommand).not.toHaveBeenCalled();
     expect(runTui).not.toHaveBeenCalled();
+    expect(note).toHaveBeenCalledWith(expect.stringContaining("Delve"), "Delve (optional)");
+    expect(confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Enable Delve tool?" }),
+    );
+  });
+
+  it("persists Delve config when enabled", async () => {
+    const select: WizardPrompter["select"] = vi.fn(async () => "quickstart");
+    const multiselect: WizardPrompter["multiselect"] = vi.fn(async () => []);
+    const note: WizardPrompter["note"] = vi.fn(async () => {});
+    const confirm: WizardPrompter["confirm"] = vi.fn(async () => true);
+    const text: WizardPrompter["text"] = vi
+      .fn()
+      .mockResolvedValueOnce("dlv_test_token")
+      .mockResolvedValueOnce("https://delve.example.com");
+
+    const prompter: WizardPrompter = {
+      intro: vi.fn(async () => {}),
+      outro: vi.fn(async () => {}),
+      note,
+      select,
+      multiselect,
+      text,
+      confirm,
+      progress: vi.fn(() => ({ update: vi.fn(), stop: vi.fn() })),
+    };
+
+    const runtime: RuntimeEnv = {
+      log: vi.fn(),
+      error: vi.fn(),
+      exit: vi.fn((code: number) => {
+        throw new Error(`exit:${code}`);
+      }),
+    };
+
+    await runOnboardingWizard(
+      {
+        acceptRisk: true,
+        flow: "quickstart",
+        authChoice: "skip",
+        installDaemon: false,
+        skipChannels: true,
+        skipSkills: true,
+        skipHealth: true,
+        skipUi: true,
+      },
+      runtime,
+      prompter,
+    );
+
+    const lastWrite = writeConfigFile.mock.calls.at(-1)?.[0];
+    expect(lastWrite).toEqual(
+      expect.objectContaining({
+        tools: expect.objectContaining({
+          delve: expect.objectContaining({
+            enabled: true,
+            token: "dlv_test_token",
+            baseUrl: "https://delve.example.com",
+          }),
+        }),
+      }),
+    );
   });
 
   it("launches TUI without auto-delivery when hatching", async () => {

@@ -385,6 +385,16 @@ export type ToolsConfig = {
       };
     };
   };
+  delve?: {
+    /** Enable Delve tool (default: true). */
+    enabled?: boolean;
+    /** Delve API base URL (defaults to DELVE_BASE_URL or http://localhost:8000). */
+    baseUrl?: string;
+    /** Delve API token (defaults to DELVE_TOKEN env var). */
+    token?: string;
+    /** Timeout in milliseconds for Delve requests. */
+    timeoutMs?: number;
+  };
   media?: MediaToolsConfig;
   links?: LinkToolsConfig;
   /** Message tool configuration. */
